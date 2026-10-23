@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
+import { getApiUrl } from '../api';
 
 /**
  * BackendStatus Component
- * Tests the connection to the Express backend (GET /api/health)
+ * Tests the connection to the backend (GET /api/health)
  * and displays the live connection status to the user.
  */
 function BackendStatus() {
   const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'success' | 'error'
   const [message, setMessage] = useState('');
+  const healthEndpoint = getApiUrl('health');
 
   const checkConnection = async () => {
     // 1. Prevent repeated clicks and set loading state
     setStatus('loading');
-    setMessage('Connecting to http://localhost:5000/api/health...');
+    setMessage(`Connecting to ${healthEndpoint}...`);
 
     try {
-      // 2. Send GET request to the Express backend
-      const response = await fetch('http://localhost:5000/api/health');
+      // 2. Send GET request to the backend health endpoint
+      const response = await fetch(healthEndpoint);
 
       // 3. Verify HTTP status is OK (status code 200-299)
       if (!response.ok) {
@@ -33,7 +35,9 @@ function BackendStatus() {
       // 6. Catch network failures or server offline errors
       setStatus('error');
       setMessage(
-        'Unable to connect to backend at http://localhost:5000. Please ensure "npm start" is running in your server terminal.'
+        `Unable to connect to backend at ${healthEndpoint}. ${
+          error.message ? `(${error.message})` : ''
+        }`
       );
     }
   };
@@ -44,7 +48,7 @@ function BackendStatus() {
         <div className="backend-status-title">
           <span className={`status-indicator-dot status-${status}`}></span>
           <strong>Backend Connection:</strong>
-          <code className="endpoint-tag">GET http://localhost:5000/api/health</code>
+          <code className="endpoint-tag">GET {healthEndpoint}</code>
         </div>
 
         <button

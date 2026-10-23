@@ -4,6 +4,7 @@ import TextInput from './components/TextInput';
 import VoiceControls from './components/VoiceControls';
 import AudioPlayer from './components/AudioPlayer';
 import BackendStatus from './components/BackendStatus';
+import { getApiUrl } from './api';
 
 /**
  * Friendly display labels for common BCP-47 language codes
@@ -265,8 +266,9 @@ function App() {
     setDownloadSuccess('');
 
     try {
-      // 1. Request MP3 binary from Express backend
-      const response = await fetch('http://localhost:5000/api/audio', {
+      // 1. Request MP3 binary from backend / Netlify serverless function
+      const audioEndpoint = getApiUrl('audio');
+      const response = await fetch(audioEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -313,8 +315,13 @@ function App() {
         setDownloadSuccess('');
       }, 5000);
     } catch (error) {
+      console.error('Download audio error:', error);
+      let errMsg = error.message;
+      if (errMsg === 'Failed to fetch') {
+        errMsg = 'Failed to connect to the audio service. If deployed on Netlify, please verify Netlify Functions or set VITE_API_URL.';
+      }
       setDownloadError(
-        error.message || 'Failed to generate audio file. Please ensure the backend is running.'
+        errMsg || 'Failed to generate audio file. Please try again.'
       );
     } finally {
       setIsDownloading(false);
@@ -334,7 +341,8 @@ function App() {
     // 2. Submit text to backend in background
     setIsGenerating(true);
     try {
-      const response = await fetch('http://localhost:5000/api/text', {
+      const textEndpoint = getApiUrl('text');
+      const response = await fetch(textEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
