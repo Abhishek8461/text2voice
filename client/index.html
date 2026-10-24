@@ -1,6 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('theme');
+          var theme = 'dark';
+          if (saved === 'dark' || saved === 'light') {
+            theme = saved;
+          } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            theme = 'light';
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Modern Text-to-Speech Web Application built with React.js" />

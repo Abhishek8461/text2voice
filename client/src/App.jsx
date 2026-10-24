@@ -4,6 +4,7 @@ import TextInput from './components/TextInput';
 import VoiceControls from './components/VoiceControls';
 import AudioPlayer from './components/AudioPlayer';
 import BackendStatus from './components/BackendStatus';
+import ThemeToggle from './components/ThemeToggle';
 import { getApiUrl } from './api';
 
 /**
@@ -35,9 +36,49 @@ function formatLanguageLabel(code) {
   }
 }
 
+function getInitialTheme() {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || saved === 'light') {
+      return saved;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      return 'light';
+    }
+  }
+  return 'dark';
+}
+
 function App() {
   // Speech Synthesis reference to prevent garbage collection in Chrome
   const currentUtteranceRef = useRef(null);
+
+  // Theme state: default to dark, persist in localStorage, follow prefers-color-scheme
+  const [theme, setTheme] = useState(getInitialTheme);
+
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+    try {
+      localStorage.setItem('theme', newTheme);
+    } catch (e) {}
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+    const handleSystemThemeChange = (e) => {
+      if (!localStorage.getItem('theme')) {
+        const nextTheme = e.matches ? 'light' : 'dark';
+        setTheme(nextTheme);
+        document.documentElement.setAttribute('data-theme', nextTheme);
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+  }, [theme]);
 
   // 1. Text and validation state
   const [text, setText] = useState(
@@ -419,6 +460,7 @@ function App() {
           </div>
 
           <div className="navbar-actions">
+            <ThemeToggle theme={theme} onThemeChange={handleThemeChange} />
             <button type="button" className="btn-nav-login">Log in</button>
             <button type="button" className="btn-nav-signup">Get started</button>
           </div>
