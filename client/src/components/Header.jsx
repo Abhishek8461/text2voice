@@ -10,18 +10,17 @@ function Header() {
       {/* Modern status badge */}
       <div className="brand-badge">
         <span className="pulse-dot"></span>
-        <span>EchoVoice Studio</span>
+        <span>AI Text to Speech</span>
       </div>
 
-      {/* Main Title with gradient highlights */}
+      {/* Main Title */}
       <h1 className="app-title">
-        Transform Your Text Into <span>Natural Speech</span>
+        Give your words a voice
       </h1>
 
       {/* Short descriptive subtitle */}
       <p className="app-subtitle">
-        Type or paste any text below, choose a voice and language, and listen to
-        lifelike audio synthesis instantly in your browser.
+        Paste your text, pick a voice and generate natural-sounding audio in seconds. Free, fast and simple.
       </p>
     </header>
   );

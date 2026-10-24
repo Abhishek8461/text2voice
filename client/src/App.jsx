@@ -109,14 +109,14 @@ function App() {
     availableLanguageCodes.length > 0
       ? availableLanguageCodes.map((code) => ({ code, label: formatLanguageLabel(code) }))
       : [
-          { code: 'en-US', label: 'English (US)' },
-          { code: 'en-GB', label: 'English (UK)' },
-          { code: 'es-ES', label: 'Spanish (Spain)' },
-          { code: 'fr-FR', label: 'French (France)' },
-          { code: 'de-DE', label: 'German (Germany)' },
-          { code: 'hi-IN', label: 'Hindi (India)' },
-          { code: 'ja-JP', label: 'Japanese (Japan)' }
-        ];
+        { code: 'en-US', label: 'English (US)' },
+        { code: 'en-GB', label: 'English (UK)' },
+        { code: 'es-ES', label: 'Spanish (Spain)' },
+        { code: 'fr-FR', label: 'French (France)' },
+        { code: 'de-DE', label: 'German (Germany)' },
+        { code: 'hi-IN', label: 'Hindi (India)' },
+        { code: 'ja-JP', label: 'Japanese (Japan)' }
+      ];
 
   // Filter voices that match the chosen language (with fallback to all)
   const voicesForLang = voices.filter(
@@ -373,115 +373,271 @@ function App() {
     }
   };
 
+  // IntersectionObserver to fade-up sections as they scroll into view
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const cards = document.querySelectorAll('.glass-card, .backend-status-card, .feature-card');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    cards.forEach((card) => observer.observe(card));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="app-wrapper">
-      {/* 1. Header with Title & Description */}
-      <Header />
-
-      {/* Backend Connection Health Check */}
-      <BackendStatus />
-
-      {/* 2. Main Studio Card */}
-      <main className="glass-card">
-        {/* Text Area & Character/Word Counters */}
-        <TextInput
-          text={text}
-          onTextChange={handleTextChange}
-          onClearText={handleClearText}
-          validationError={validationError}
-        />
-
-        {/* Dropdowns (Language, Voice) and Sliders (Speed, Pitch) */}
-        <VoiceControls
-          language={language}
-          onLanguageChange={handleLanguageChange}
-          voice={voice}
-          onVoiceChange={setVoice}
-          speed={speed}
-          onSpeedChange={setSpeed}
-          pitch={pitch}
-          onPitchChange={setPitch}
-          voiceOptions={activeVoiceList}
-          languageOptions={languageOptions}
-        />
-
-        {/* Generate Speech Action Button */}
-        <div className="action-row">
-          <button
-            type="button"
-            id="generate-speech-btn"
-            className="generate-btn"
-            onClick={handleGenerateSpeech}
-            disabled={playbackStatus === 'speaking' || isGenerating}
-            title="Convert text to speech using Web Speech API"
-          >
-            {playbackStatus === 'speaking' ? (
-              <>
-                <span className="spinner"></span>
-                Speaking...
-              </>
-            ) : isGenerating ? (
-              <>
-                <span className="spinner"></span>
-                Processing...
-              </>
-            ) : (
-              <>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                </svg>
-                Generate Speech
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Backend Text Submission Feedback Display */}
-        {submissionResult && (
-          <div
-            id="text-submission-result"
-            className={`submission-feedback-box feedback-${submissionResult.type}`}
-          >
-            <div className="feedback-header">
-              <span className={`feedback-icon-dot dot-${submissionResult.type}`}></span>
-              <strong>
-                {submissionResult.type === 'success'
-                  ? `Backend Response (${submissionResult.status} OK)`
-                  : `Backend Error ${submissionResult.status ? `(${submissionResult.status})` : '(Offline)'}`}
-              </strong>
+    <div className="app-page">
+      {/* 1. Sticky Navigation Bar */}
+      <nav className="site-navbar">
+        <div className="navbar-container">
+          <div className="navbar-brand">
+            <div className="brand-logo-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <rect width="24" height="24" rx="6" fill="#4F46E5" />
+                <path d="M6 10v4M10 7v10M14 6v12M18 9v6" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" />
+              </svg>
             </div>
-            <p className="feedback-message">{submissionResult.message}</p>
-            {submissionResult.text && (
-              <div className="feedback-received-text">
-                <span className="feedback-label">Server received text:</span>
-                <code>&ldquo;{submissionResult.text}&rdquo;</code>
+            <span className="brand-name">EchoVoice</span>
+          </div>
+
+          <div className="navbar-links">
+            <a href="/" className="nav-link active">Home</a>
+            <a href="#features" className="nav-link">Features</a>
+            <a href="#voices" className="nav-link">Voices</a>
+            <a href="#pricing" className="nav-link">Pricing</a>
+            <a href="#faq" className="nav-link">FAQ</a>
+          </div>
+
+          <div className="navbar-actions">
+            <button type="button" className="btn-nav-login">Log in</button>
+            <button type="button" className="btn-nav-signup">Get started</button>
+          </div>
+        </div>
+      </nav>
+
+      {/* 2. Main Content Container with Decorative Blobs */}
+      <div className="app-container">
+        {/* 3 decorative blurred blobs */}
+        <div className="glass-blob blob-indigo" aria-hidden="true"></div>
+        <div className="glass-blob blob-violet" aria-hidden="true"></div>
+        <div className="glass-blob blob-sky" aria-hidden="true"></div>
+
+        <div className="app-wrapper">
+          {/* Header with Title & Description */}
+          <Header />
+
+          {/* Backend Connection Health Check */}
+          <BackendStatus />
+
+          {/* Main Studio Card */}
+          <main className="glass-card">
+            {/* Text Area & Character/Word Counters */}
+            <TextInput
+              text={text}
+              onTextChange={handleTextChange}
+              onClearText={handleClearText}
+              validationError={validationError}
+            />
+
+            {/* Dropdowns (Language, Voice) and Sliders (Speed, Pitch) */}
+            <VoiceControls
+              language={language}
+              onLanguageChange={handleLanguageChange}
+              voice={voice}
+              onVoiceChange={setVoice}
+              speed={speed}
+              onSpeedChange={setSpeed}
+              pitch={pitch}
+              onPitchChange={setPitch}
+              voiceOptions={activeVoiceList}
+              languageOptions={languageOptions}
+            />
+
+            {/* Generate Speech Action Button */}
+            <div className="action-row">
+              <button
+                type="button"
+                id="generate-speech-btn"
+                className="generate-btn"
+                onClick={handleGenerateSpeech}
+                disabled={playbackStatus === 'speaking' || isGenerating}
+                title="Convert text to speech using Web Speech API"
+              >
+                {playbackStatus === 'speaking' ? (
+                  <>
+                    <span className="spinner"></span>
+                    Speaking...
+                  </>
+                ) : isGenerating ? (
+                  <>
+                    <span className="spinner"></span>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    Generate Speech
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Backend Text Submission Feedback Display */}
+            {submissionResult && (
+              <div
+                id="text-submission-result"
+                className={`submission-feedback-box feedback-${submissionResult.type}`}
+              >
+                <div className="feedback-header">
+                  <span className={`feedback-icon-dot dot-${submissionResult.type}`}></span>
+                  <strong>
+                    {submissionResult.type === 'success'
+                      ? `Backend Response (${submissionResult.status} OK)`
+                      : `Backend Error ${submissionResult.status ? `(${submissionResult.status})` : '(Offline)'}`}
+                  </strong>
+                </div>
+                <p className="feedback-message">{submissionResult.message}</p>
+                {submissionResult.text && (
+                  <div className="feedback-received-text">
+                    <span className="feedback-label">Server received text:</span>
+                    <code>&ldquo;{submissionResult.text}&rdquo;</code>
+                  </div>
+                )}
               </div>
             )}
+          </main>
+
+          {/* Real Speech Playback & MP3 Download Section */}
+          <AudioPlayer
+            playbackStatus={playbackStatus}
+            onSpeak={speakText}
+            onPause={handlePause}
+            onResume={handleResume}
+            onStop={handleStop}
+            onDownloadAudio={handleDownloadAudio}
+            isDownloading={isDownloading}
+            downloadError={downloadError}
+            downloadSuccess={downloadSuccess}
+            currentVoiceName={currentVoiceName}
+            text={text}
+            isSpeechSupported={isSpeechSupported}
+            speechError={speechError}
+          />
+
+          {/* Features Showcase Section */}
+          <section className="features-section" id="features" aria-label="Feature Highlights">
+            <h2 className="features-title">Everything you need to create great audio</h2>
+            <div className="features-grid">
+              <div className="feature-card">
+                <div className="feature-icon-box">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </div>
+                <h3 className="feature-heading">Instant generation</h3>
+                <p className="feature-description">
+                  Turn any script into clear, natural speech in seconds, right in your browser.
+                </p>
+              </div>
+
+              <div className="feature-card">
+                <div className="feature-icon-box">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
+                </div>
+                <h3 className="feature-heading">Multiple languages</h3>
+                <p className="feature-description">
+                  Choose from a wide range of languages, accents and voices for every audience.
+                </p>
+              </div>
+
+              <div className="feature-card">
+                <div className="feature-icon-box">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                </div>
+                <h3 className="feature-heading">Download as MP3</h3>
+                <p className="feature-description">
+                  Save your audio in one click and use it in videos, podcasts or presentations.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/* 3. Site Footer (Matches reference design) */}
+      <footer className="site-footer">
+        <div className="footer-container">
+          <div className="footer-top">
+            <div className="footer-brand-col">
+              <div className="footer-logo">
+                <div className="brand-logo-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <rect width="24" height="24" rx="6" fill="#4F46E5" />
+                    <path d="M6 10v4M10 7v10M14 6v12M18 9v6" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <span className="footer-brand-name">EchoVoice</span>
+              </div>
+              <p className="footer-tagline">
+                Modern text-to-speech for creators, teams and learners.
+              </p>
+            </div>
+
+            <div className="footer-links-group">
+              <div className="footer-col">
+                <h4 className="footer-col-title">Product</h4>
+                <ul className="footer-links">
+                  <li><a href="#features">Features</a></li>
+                  <li><a href="#voices">Voices</a></li>
+                  <li><a href="#pricing">Pricing</a></li>
+                </ul>
+              </div>
+
+              <div className="footer-col">
+                <h4 className="footer-col-title">Company</h4>
+                <ul className="footer-links">
+                  <li><a href="#about">About</a></li>
+                  <li><a href="#contact">Contact</a></li>
+                  <li><a href="#blog">Blog</a></li>
+                </ul>
+              </div>
+
+              <div className="footer-col">
+                <h4 className="footer-col-title">Legal</h4>
+                <ul className="footer-links">
+                  <li><a href="#privacy">Privacy Policy</a></li>
+                  <li><a href="#terms">Terms of Use</a></li>
+                </ul>
+              </div>
+            </div>
           </div>
-        )}
-      </main>
 
-      {/* 3. Real Speech Playback & MP3 Download Section */}
-      <AudioPlayer
-        playbackStatus={playbackStatus}
-        onSpeak={speakText}
-        onPause={handlePause}
-        onResume={handleResume}
-        onStop={handleStop}
-        onDownloadAudio={handleDownloadAudio}
-        isDownloading={isDownloading}
-        downloadError={downloadError}
-        downloadSuccess={downloadSuccess}
-        currentVoiceName={currentVoiceName}
-        text={text}
-        isSpeechSupported={isSpeechSupported}
-        speechError={speechError}
-      />
-
-      {/* 4. Footer */}
-      <footer className="app-footer">
-        <p>Built with React & Vite • Browser Web Speech API</p>
+          <div className="footer-bottom">
+            <p className="footer-copyright">© 2026 EchoVoice. All rights reserved.</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
