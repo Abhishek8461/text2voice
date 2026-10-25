@@ -461,8 +461,6 @@ function App() {
 
           <div className="navbar-actions">
             <ThemeToggle theme={theme} onThemeChange={handleThemeChange} />
-            <button type="button" className="btn-nav-login">Log in</button>
-            <button type="button" className="btn-nav-signup">Get started</button>
           </div>
         </div>
       </nav>
