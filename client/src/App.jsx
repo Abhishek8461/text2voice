@@ -472,6 +472,14 @@ function App() {
         <div className="glass-blob blob-violet" aria-hidden="true"></div>
         <div className="glass-blob blob-sky" aria-hidden="true"></div>
 
+        {/* 3D floating orbs (decorative) */}
+        <div className="hero-orb hero-orb--large" aria-hidden="true">
+          <div className="orb-ring-wrap"><div className="orb-ring"></div></div>
+        </div>
+        <div className="hero-orb hero-orb--small" aria-hidden="true">
+          <div className="orb-ring-wrap"><div className="orb-ring"></div></div>
+        </div>
+
         <div className="app-wrapper">
           {/* Header with Title & Description */}
           <Header />
